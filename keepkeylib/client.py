@@ -859,6 +859,28 @@ class ProtocolMixin(object):
 
         raise Exception("Unexpected result %s" % resp)
 
+    # U2F specific messages
+
+    @field('message')
+    @expect(proto.Success)
+    def u2f_init(self, attestation_key, attestation_cert, counter):
+        res = self.call(proto.U2FInit(u2f_attestation_key=attestation_key,
+                                    u2f_attestation_cert=attestation_cert,
+                                    u2f_counter=counter))
+        return res
+
+    @field('u2f_counter')
+    @expect(proto.U2FCounter)
+    def u2f_get_counter(self):
+        return self.call(proto.U2FGetCounter())
+
+    @field('message')
+    @expect(proto.Success)
+    def u2f_set_transient_entry(self, uri, name):
+        res = self.call(proto.U2FSetEntry(uri=uri,
+                                    name=name))
+        return res
+
 class KeepKeyClient(ProtocolMixin, TextUIMixin, BaseClient):
     pass
 

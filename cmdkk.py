@@ -217,6 +217,21 @@ class Commands(object):
         fp.seek(0)
         return self.client.firmware_update(fp=fp)
 
+    def u2f_init(self, args):
+        if not args.attestation_key:
+            raise Exception("Missing attestation key")
+        if not args.attestation_cert:
+            raise Exception("Missing attestation certificate")
+        if not args.counter:
+            raise Exception("Missing counter")
+        return self.client.u2f_init(args.attestation_key.decode('hex'), args.attestation_cert.decode('hex'), args.counter)
+
+    def u2f_get_counter(self, args):
+        return self.client.u2f_get_counter()
+
+    def u2f_add_transient_entry(self, args):
+        return self.client.u2f_set_transient_entry(args.uri, args.name)
+
     list.help = 'List connected KeepKey USB devices'
     ping.help = 'Send ping message'
     get_address.help = 'Get bitcoin address in base58 encoding'
@@ -238,6 +253,9 @@ class Commands(object):
     encrypt_keyvalue.help = 'Encrypt value by given key and path'
     decrypt_keyvalue.help = 'Decrypt value by given key and path'
     firmware_update.help = 'Upload new firmware to device (must be in bootloader mode)'
+    u2f_init.help = 'Initialize U2F features'
+    u2f_get_counter.help = 'Get the current value of U2F counter'
+    u2f_add_transient_entry.help = 'Add a transient named U2F mapping'
 
     get_address.arguments = (
         (('-c', '--coin'), {'type': str, 'default': 'Bitcoin'}),
@@ -338,6 +356,19 @@ class Commands(object):
     firmware_update.arguments = (
         (('-f', '--file'), {'type': str}),
         (('-u', '--url'), {'type': str}),
+    )
+
+    u2f_init.arguments = (
+        (('-k', '--attestation-key'), {'type': str}),
+        (('-t', '--attestation-cert'), {'type': str}),
+        (('-c', '--counter'), {'type': int}),
+    )
+
+    u2f_get_counter.arguments = ()
+
+    u2f_add_transient_entry.arguments = (
+        (('-u', '--uri'), {'type': str}),
+        (('-n', '--name'), {'type': str}),        
     )
 
 def list_usb():
